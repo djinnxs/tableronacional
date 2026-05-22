@@ -1,0 +1,12 @@
+streamlit
+pandas
+pyarrow
+geopandas
+plotly
+duckdb
+requests
+beautifulsoup4
+pydantic
+xlsxwriter
+openpyxl
+google-generativeai

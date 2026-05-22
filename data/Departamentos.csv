@@ -1,0 +1,530 @@
+﻿DEPARTAMENTO;ID_DEPARTAMENTO
+COMUNA 1;02000
+COMUNA 1;02001
+COMUNA 2;02002
+COMUNA 3;02003
+COMUNA 4;02004
+COMUNA 5;02005
+COMUNA 6;02006
+COMUNA 7;02007
+COMUNA 8;02008
+COMUNA 9;02009
+COMUNA 10;02010
+COMUNA 11;02011
+COMUNA 12;02012
+COMUNA 13;02013
+COMUNA 14;02014
+COMUNA 15;02015
+Adolfo Alsina;06007
+Adolfo Gonzales Chaves;06014
+Alberti;06021
+Almirante Brown;06028
+Avellaneda;06035
+Ayacucho;06042
+Azul;06049
+Bahía Blanca;06056
+Quilmes;06058
+Balcarce;06063
+Baradero;06070
+Arrecifes;06077
+Benito Juárez;06084
+Berazategui;06091
+Berisso;06098
+Bolívar;06105
+Bragado;06112
+Brandsen;06119
+Campana;06126
+Cañuelas;06134
+Capitán Sarmiento;06140
+Carlos Casares;06147
+Carlos Tejedor;06154
+Carmen de Areco;06161
+Castelli;06168
+Colón;06175
+Coronel de Marina L. Rosales;06182
+Coronel Dorrego;06189
+Coronel Pringles;06196
+Coronel Suárez;06203
+Chacabuco;06210
+Chascomús;06217
+Chivilcoy;06224
+Daireaux;06231
+Dolores;06238
+Ensenada;06245
+Escobar;06252
+Esteban Echeverría;06260
+Exaltación de la Cruz;06266
+Ezeiza;06270
+Florencio Varela;06274
+Florentino Ameghino;06277
+General Alvarado;06280
+General Alvear;06287
+General Arenales;06294
+General Belgrano;06301
+General Guido;06308
+General Juan Madariaga;06315
+General La Madrid;06322
+General Las Heras;06329
+General Lavalle;06336
+General Paz;06343
+General Pinto;06351
+General Pueyrredón;06357
+General Rodríguez;06364
+General San Martín;06371
+General Viamonte;06385
+General Villegas;06392
+Guaminí;06399
+Hipólito Yrigoyen;06406
+Hurlingham;06408
+Ituzaingó;06410
+José C. Paz;06412
+Junín;06413
+La Costa;06420
+La Matanza;06427
+Lanús;06434
+La Plata;06441
+Laprida;06448
+Las Flores;06455
+Leandro N. Alem;06462
+Lezama;06466
+Lincoln;06469
+Lobería;06476
+Lobos;06483
+Lomas de Zamora;06490
+Luján;06497
+Magdalena;06505
+Maipú;06511
+Malvinas Argentinas;06515
+Mar Chiquita;06518
+Marcos Paz;06525
+Mercedes;06532
+Merlo;06539
+Monte;06547
+Monte Hermoso;06553
+Moreno;06560
+Morón;06568
+Navarro;06574
+Necochea;06581
+9 de Julio;06588
+Olavarría;06595
+Patagones;06602
+Pehuajó;06609
+Pellegrini;06616
+Pergamino;06623
+Pila;06630
+Pilar;06638
+"Pinamar ";06644
+Presidente Perón;06648
+Puán;06651
+Punta Indio;06655
+Quilmes;06658
+Ramallo;06665
+Rauch;06672
+Rivadavia;06679
+Rojas;06686
+Roque Pérez;06693
+Saavedra;06700
+Saladillo;06707
+Salto;06714
+Salliqueló;06721
+San Andrés de Giles;06728
+San Antonio de Areco;06735
+San Cayetano;06742
+San Fernando;06749
+San Isidro;06756
+San Miguel;06760
+San Nicolás;06763
+San Pedro;06770
+San Vicente;06778
+Suipacha;06784
+Tandil;06791
+Tapalqué;06798
+Tigre;06805
+Tordillo;06812
+Tornquist;06819
+Trenque Lauquen;06826
+Tres Arroyos;06833
+Tres de Febrero;06840
+"Tres Lomas ";06847
+25 de Mayo;06854
+Vicente López;06861
+"Villa Gesell ";06868
+Villarino;06875
+"Zárate ";06882
+Ambato;10007
+Ancasti;10014
+Andalgalá;10021
+Antofagasta de la Sierra;10028
+Belén;10035
+Capayán;10042
+Capital;10049
+El Alto;10056
+Fray Mamerto Esquiú;10063
+La Paz;10070
+Paclín;10077
+Pomán;10084
+Santa María;10091
+Santa Rosa;10098
+Tinogasta;10105
+Valle Viejo;10112
+Calamuchita;14007
+Capital;14014
+Colón;14021
+Cruz del Eje;14028
+General Roca;14035
+General San Martín;14042
+Ischilín;14049
+Juárez Celman;14056
+Marcos Juárez;14063
+Minas;14070
+Pocho;14077
+Presidente Roque Sáenz Peña;14084
+Punilla;14091
+Río Cuarto;14098
+Río Primero;14105
+Río Seco;14112
+Río Segundo;14119
+San Alberto;14126
+San Javier;14133
+San Justo;14140
+Santa María;14147
+Sobremonte;14154
+Tercero Arriba;14161
+Totoral;14168
+Tulumba;14175
+Unión;14182
+Bella Vista;18007
+Berón de Astrada;18014
+Capital;18021
+Concepción;18028
+Curuzú Cuatiá;18035
+Empedrado;18042
+Esquina;18049
+General Alvear;18056
+General Paz;18063
+Goya;18070
+Itatí;18077
+Ituzaingó;18084
+Lavalle;18091
+Mburucuyá;18098
+Mercedes;18105
+Monte Caseros;18112
+Paso de los Libres;18119
+Saladas;18126
+San Cosme;18133
+San Luis del Palmar;18140
+San Martín;18147
+San Miguel;18154
+San Roque;18161
+Santo Tomé;18168
+Sauce;18175
+Almirante Brown;22007
+Bermejo;22014
+Comandante Fernández;22021
+Chacabuco;22028
+12 de Octubre;22036
+2 de Abril;22039
+Fray Justo Santa María de Oro;22043
+General Belgrano;22049
+General Donovan;22056
+General Güemes;22063
+Independencia;22070
+Libertad;22077
+Libertador General San Martín;22084
+Maipú;22091
+Mayor Luis J. Fontana;22098
+9 de Julio;22105
+O'Higgins;22112
+Presidencia de la Plaza;22119
+1º de Mayo;22126
+Quitilipi;22133
+San Fernando;22140
+San Lorenzo;22147
+Sargento Cabral;22154
+Tapenagá;22161
+25 de Mayo;22168
+Biedma;26007
+Cushamen;26014
+Escalante;26021
+Florentino Ameghino;26028
+Futaleufú;26035
+Gaiman;26042
+Gastre;26049
+Languiñeo;26056
+Mártires;26063
+Paso de Indios;26070
+Rawson;26077
+Río Senguer;26084
+"Sarmiento ";26091
+Tehuelches;26098
+Telsen;26105
+Colón;30008
+Concordia;30015
+Diamante;30021
+Federación;30028
+Federal;30035
+Feliciano;30042
+Gualeguay;30049
+Gualeguaychú;30056
+Islas del Ibicuy;30063
+La Paz;30070
+Nogoyá;30077
+Paraná;30084
+San Salvador;30088
+Tala;30091
+Uruguay;30098
+Victoria;30105
+Villaguay;30113
+Bermejo;34007
+Formosa;34014
+Laishi;34021
+Matacos;34028
+Patiño;34035
+Pilagás;34042
+Pilcomayo;34049
+Pirané;34056
+Ramón Lista;34063
+Cochinoca;38007
+El Carmen;38014
+Dr. Manuel Belgrano;38021
+Tilcara;38028
+Ledesma;38035
+"Palpalá ";38042
+Rinconada;38049
+San Antonio;38056
+San Pedro;38063
+Santa Bárbara;38070
+Santa Catalina;38077
+Susques;38084
+Tilcara;38094
+Tumbaya;38098
+Valle Grande;38105
+Yavi;38112
+Atreucó;42007
+Caleu Caleu;42014
+Capital;42021
+Catriló;42028
+Conhelo;42035
+Curacó;42042
+Chalileo;42049
+Chapaleufú;42056
+Chical Co;42063
+Guatraché;42070
+Hucal;42077
+Lihuel Calel;42084
+Limay Mahuida;42091
+Loventué;42098
+Maracó;42105
+Puelén;42112
+Quemú Quemú;42119
+Rancul;42126
+Realicó;42133
+Toay;42140
+Trenel;42147
+Utracán;42154
+Arauco;46007
+Capital;46014
+Castro Barros;46021
+Coronel Felipe Varela;46028
+"Chamical ";46035
+"Chilecito ";46042
+"Famatina ";46049
+General Angel V. Peñaloza;46056
+General Belgrano;46063
+General Juan F. Quiroga;46070
+General Lamadrid;46077
+General Ocampo;46084
+General San Martín;46091
+Vinchina;46098
+Independencia;46105
+Rosario Vera Peñaloza;46112
+San Blas de los Sauces;46119
+Sanagasta;46126
+Las Heras;50007
+General Alvear;50014
+Godoy Cruz;50021
+Guaymallén;50028
+Junín;50035
+"La Paz ";50042
+Las Heras;50049
+Lavalle;50056
+Luján de Cuyo;50063
+Maipú;50070
+Malargüe;50077
+Rivadavia;50084
+San Carlos;50091
+San Martín;50098
+San Rafael;50105
+Santa Rosa;50112
+Tunuyán;50119
+Tupungato;50126
+Apóstoles;54007
+Cainguás;54014
+Candelaria;54021
+Capital;54028
+"Concepción ";54035
+Eldorado;54042
+General Manuel Belgrano;54049
+Guaraní;54056
+Iguazú;54063
+Leandro N. Alem;54070
+Libertador Grl. San Martín;54077
+Montecarlo;54084
+Oberá;54091
+San Ignacio;54098
+San Javier;54105
+San Pedro;54112
+25 de Mayo;54119
+Aluminé;58007
+Añelo;58014
+Catán Lil;58021
+Collón Curá;58028
+Confluencia;58035
+Chos Malal;58042
+Huiliches;58049
+Lácar;58056
+Loncopué;58063
+Los Lagos;58070
+Minas;58077
+Ñorquín;58084
+Pehuenches;58091
+Picún Leufú;58098
+Picunches;58105
+"Zapala ";58112
+Adolfo Alsina;62007
+Avellaneda;62014
+Las Heras;62021
+Conesa;62028
+El Cuy;62035
+General Roca;62042
+9 de Julio;62049
+Ñorquincó;62056
+Pichi Mahuida;62063
+Pilcaniyeu;62070
+San Antonio;62077
+Valcheta;62084
+25 de Mayo;62091
+Anta;66007
+Cachi;66014
+Cafayate;66021
+Capital;66028
+"Cerrillos ";66035
+Chicoana;66042
+General Güemes;66049
+Grl. José de San Martín;66056
+Guachipas;66063
+Iruya;66070
+La Caldera;66077
+La Candelaria;66084
+La Poma;66091
+La Viña;66098
+Los Andes;66105
+Metán;66112
+Molinos;66119
+Orán;66126
+Rivadavia;66133
+Rosario de la Frontera;66140
+Rosario de Lerma;66147
+San Carlos;66154
+Santa Victoria;66161
+Albardón;70007
+Angaco;70014
+Calingasta;70021
+Capital;70028
+Caucete;70035
+Chimbas;70042
+Iglesia;70049
+Jáchal;70056
+9 de Julio;70063
+Pocito;70070
+Rawson;70077
+Rivadavia;70084
+San Martín;70091
+Santa Lucía;70098
+Sarmiento;70105
+Ullúm;70112
+Valle Fértil;70119
+25 de Mayo;70126
+Zonda;70133
+Ayacucho;74007
+Belgrano;74014
+Coronel Pringles;74021
+Chacabuco;74028
+General Pedernera;74035
+Gobernador Dupuy;74042
+Junín;74049
+La Capital;74056
+Libertador General San Martín;74063
+Corpen Aike;78007
+Deseado;78014
+Güer Aike;78021
+Lago Argentino;78028
+Lago Buenos Aires;78035
+Magallanes;78042
+Río Chico;78049
+Belgrano;82007
+Caseros;82014
+Castellanos;82021
+Constitución;82028
+Garay;82035
+General López;82042
+Vera;82049
+Iriondo;82056
+La Capital;82063
+Las Colonias;82070
+9 de Julio;82077
+Rosario;82084
+San Cristóbal;82091
+San Javier;82098
+San Jerónimo;82105
+San Justo;82112
+San Lorenzo;82119
+San Martín;82126
+Vera;82133
+Aguirre;86007
+Alberdi;86014
+Atamisqui;86021
+Avellaneda;86028
+Banda;86035
+Belgrano;86042
+Capital;86049
+Copo;86056
+Choya;86063
+Figueroa;86070
+General Taboada;86077
+Guasayán;86084
+Jiménez;86091
+Juan F. Ibarra;86098
+Loreto;86105
+Mitre;86112
+Moreno;86119
+Ojo de Agua;86126
+Pellegrini;86133
+Quebrachos;86140
+Río Hondo;86147
+Rivadavia;86154
+Robles;86161
+Salavina;86168
+San Martín;86175
+Sarmiento;86182
+Silípica;86189
+Burruyacú;90007
+Cruz Alta;90014
+Chicligasta;90021
+Famaillá;90028
+Graneros;90035
+Juan Bautista Alberdi;90042
+La Cocha;90049
+Leales;90056
+Lules;90063
+Monteros;90070
+Río Chico;90077
+Capital;90084
+Simoca;90091
+Tafí del Valle;90098
+Tafí Viejo;90105
+Trancas;90112
+Yerba Buena;90119
+Río Grande;94007
+Ushuaia;94014
+Antártida Argentina;94028

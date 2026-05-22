@@ -1,0 +1,377 @@
+import streamlit as st
+import pandas as pd
+import duckdb
+import plotly.express as px
+import json
+import os
+import numpy as np
+
+# Function to format numbers for Argentine locale (e.g. 1.234,56)
+def format_ar_number(val, decimals=0):
+    try:
+        if pd.isna(val): return ""
+        if decimals == 0:
+            return f"{int(val):,}".replace(",", ".")
+        else:
+            formatted = f"{val:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            return formatted
+    except:
+        return val
+
+# DEBUG: Check versions
+# st.write(f"Pandas version: {pd.__version__}")
+# st.write(f"Numpy version: {np.__version__}")
+# print(f"DEBUG - Pandas version: {pd.__version__}")
+# print(f"DEBUG - Numpy version: {np.__version__}")
+
+# --- PAGE CONFIG ---
+st.set_page_config(
+    page_title="Tablero Epidemiológico Nacional",
+    page_icon="🇦🇷",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# --- CUSTOM CSS ---
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .main {
+        background-color: #f0f2f6;
+    }
+    
+    .stMetric {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .premium-header {
+        color: #1e3a8a;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.025em;
+    }
+    
+    .stButton>button {
+        width: 100%;
+        border-radius: 8px;
+        height: 3em;
+        background-color: #1e3a8a !important;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Custom info box */
+    .info-box {
+        background-color: #eff6ff;
+        border-left: 4px solid #3b82f6;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        color: #1e3a8a; /* Explicit dark color for visibility */
+    }
+    
+    /* Fix for streamlit info box text */
+    .stAlert p {
+        color: #1e3a8a !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- UTILS ---
+def query_data(sql_query, parquet_path=None):
+    """Executa SQL directamente con DuckDB. parquet_path es ignorado — el path ya viene en el SQL."""
+    try:
+        with duckdb.connect() as con:
+            return con.execute(sql_query).df()
+    except Exception as e:
+        st.error(f"Error al consultar datos: {e}")
+        return pd.DataFrame()
+
+@st.cache_data
+def load_geojson(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+# --- DATA PATHS ---
+BASE_PARQUET = 'data/base_nacional.parquet'
+PROV_POP_PARQUET = 'data/poblacionxprovinciaindec.parquet'
+DEPTO_POP_PARQUET = 'data/proyecciones_depto_indec.parquet'
+PROV_GEOJSON = 'data/provincia.json'
+DEPTO_GEOJSON = 'data/departamento.json'
+
+# --- LOAD FILTERS DATA ---
+@st.cache_data
+def get_filter_options():
+    with duckdb.connect() as con:
+        anios_raw = [int(r[0]) for r in con.execute(f"SELECT DISTINCT ANIO FROM '{BASE_PARQUET}' ORDER BY 1 DESC").fetchall()]
+        # Filter out unrealistic future years (like 2201)
+        anios = [str(a) for a in anios_raw if 2000 <= a <= 2026]
+        # Fetch ID and Evento pairs
+        eventos_raw = con.execute(f"SELECT DISTINCT ID_SNVS_EVENTO, Evento FROM '{BASE_PARQUET}' ORDER BY Evento").fetchall()
+        eventos_dict = {r[0]: r[1] for r in eventos_raw}
+        provincias = [str(r[0]) for r in con.execute(f"SELECT DISTINCT Provincia FROM '{BASE_PARQUET}' ORDER BY 1").fetchall()]
+        semanas = sorted([int(r[0]) for r in con.execute(f"SELECT DISTINCT SEMANA FROM '{BASE_PARQUET}'").fetchall()])
+        semanas_options = ["Todas"] + [str(s) for s in semanas]
+    return anios, eventos_dict, provincias, semanas_options
+
+anios, eventos_dict, provincias_list, semanas_list = get_filter_options()
+
+# --- SIDEBAR FILTERS ---
+st.sidebar.image("https://www.argentina.gob.ar/sites/default/files/logo_snvs_2.0_0.png", width=200)
+st.sidebar.title("Filtros")
+
+# Set default year to 2026 if available
+default_anio_idx = anios.index("2026") if "2026" in anios else 0
+selected_anio = st.sidebar.selectbox("Año", anios, index=default_anio_idx)
+# Fix: Added "Todas" and set as default as requested
+selected_semanas = st.sidebar.multiselect("Semanas Epidemiológicas", semanas_list, default=["Todas"])
+
+# Multiselect for events showing Name but using ID
+eventos_options = list(eventos_dict.keys())
+def format_event(id):
+    return f"{id} - {eventos_dict[id]}"
+
+selected_event_ids = st.sidebar.multiselect(
+    "Eventos (ID - Patología)", 
+    eventos_options, 
+    format_func=format_event,
+    default=[]
+)
+
+# Clarifying the Jurisdiction selection
+st.sidebar.markdown("---")
+st.sidebar.subheader("Nivel de Análisis")
+selected_provincia = st.sidebar.selectbox(
+    "Seleccione Jurisdicción", 
+    ["Nacional (Ver Provincias)"] + provincias_list
+)
+# Internal variable to handle the logic
+provincia_filter = "Nacional" if selected_provincia == "Nacional (Ver Provincias)" else selected_provincia
+
+metric_option = st.sidebar.radio("Métrica Visual", ["Casos", "Tasas (cada 100k hab.)"])
+
+# Set default generate_map to True to show dashboard on first load
+if "generate_map" not in st.session_state:
+    st.session_state.generate_map = True
+
+if st.sidebar.button("🗺️ Generar Tablero", type="primary"):
+    st.session_state.generate_map = True
+
+# --- MAIN LOGIC ---
+if st.session_state.get("generate_map"):
+    # --- DATA QUERYING ---
+    def get_main_data():
+        where_clauses = [f"ANIO = {selected_anio}"]
+        if selected_semanas and "Todas" not in selected_semanas:
+            semanas_str = ", ".join(map(str, selected_semanas))
+            where_clauses.append(f"SEMANA IN ({semanas_str})")
+        if selected_event_ids:
+            ids_str = ", ".join(map(str, selected_event_ids))
+            where_clauses.append(f"ID_SNVS_EVENTO IN ({ids_str})")
+        
+        where_str = " AND ".join(where_clauses)
+        
+        # Query total cases first
+        total_sql = f"SELECT SUM(CANTIDAD) FROM '{BASE_PARQUET}' WHERE {where_str}"
+        total_matching = query_data(total_sql, BASE_PARQUET).iloc[0,0] if not query_data(total_sql, BASE_PARQUET).empty else 0
+        
+        # Dataframes to return
+        df_prov = pd.DataFrame()
+        df_depto = pd.DataFrame()
+
+        # Always fetch provincial data
+        sql_prov = f"""
+        SELECT id_provincia, Provincia, SUM(CANTIDAD) as Casos 
+        FROM '{BASE_PARQUET}' 
+        WHERE {where_str} AND id_provincia != '00'
+        GROUP BY id_provincia, Provincia
+        """
+        df_prov = query_data(sql_prov, BASE_PARQUET)
+        if not df_prov.empty:
+            df_prov['id_provincia'] = df_prov['id_provincia'].astype(str).str.zfill(2)
+            # Filter population by sexo_nombre = 'Ambos sexos' to avoid double counting
+            pop_prov_sql = f"SELECT juri as id_provincia, SUM(poblacion) as Poblacion FROM '{PROV_POP_PARQUET}' WHERE ano = {selected_anio} AND sexo_nombre = 'Ambos sexos' GROUP BY juri"
+            pop_prov = query_data(pop_prov_sql, PROV_POP_PARQUET)
+            if not pop_prov.empty:
+                pop_prov['id_provincia'] = pop_prov['id_provincia'].astype(str).str.zfill(2)
+            df_prov = df_prov.merge(pop_prov, on='id_provincia', how='left')
+            df_prov['Poblacion'] = pd.to_numeric(df_prov['Poblacion'], errors='coerce').fillna(0)
+            df_prov['Tasa'] = (df_prov['Casos'] / df_prov['Poblacion'] * 100000).fillna(0)
+
+        # Fetch departmental data (either for one province or for the whole country)
+        depto_where = where_str
+        if provincia_filter != "Nacional":
+            depto_where += f" AND Provincia = '{provincia_filter}'"
+        
+        sql_depto = f"""
+        SELECT id_departamento, Departamento, Provincia, SUM(CANTIDAD) as Casos 
+        FROM '{BASE_PARQUET}' 
+        WHERE {depto_where} AND id_departamento NOT LIKE '%000'
+        GROUP BY id_departamento, Departamento, Provincia
+        """
+        df_depto = query_data(sql_depto, BASE_PARQUET)
+        if not df_depto.empty:
+            df_depto['id_departamento'] = df_depto['id_departamento'].astype(str).str.zfill(5)
+            # Filter population by sexo_nombre = 'Ambos sexos'
+            pop_depto_sql = f"SELECT juri_codigo, departamento_codigo, SUM(poblacion) as Poblacion FROM '{DEPTO_POP_PARQUET}' WHERE ano = {selected_anio} AND sexo_nombre = 'Ambos sexos' GROUP BY juri_codigo, departamento_codigo"
+            pop_depto = query_data(pop_depto_sql, DEPTO_POP_PARQUET)
+            if not pop_depto.empty:
+                pop_depto['id_departamento'] = pop_depto['juri_codigo'].astype(str).str.zfill(2) + pop_depto['departamento_codigo'].astype(str).str.zfill(3)
+                df_depto = df_depto.merge(pop_depto[['id_departamento', 'Poblacion']], on='id_departamento', how='left')
+                df_depto['Poblacion'] = pd.to_numeric(df_depto['Poblacion'], errors='coerce').fillna(0)
+                df_depto['Tasa'] = (df_depto['Casos'] / df_depto['Poblacion'] * 100000).fillna(0)
+
+        casos_sin_loc = total_matching - df_prov['Casos'].sum() if not df_prov.empty else total_matching
+        return df_prov, df_depto, casos_sin_loc
+
+    df_prov, df_depto, casos_sin_loc = get_main_data()
+
+    # --- DASHBOARD MAIN CONTENT ---
+    if selected_event_ids:
+        eventos_label = ", ".join([eventos_dict[id] for id in selected_event_ids])
+    else:
+        eventos_label = "Todos los eventos"
+        
+    st.markdown(f"<h1 class='premium-header'>Análisis Epidemiológico</h1>", unsafe_allow_html=True)
+    st.markdown(f"### {eventos_label}")
+
+    semanas_label = "Todas" if "Todas" in selected_semanas else (", ".join(map(str, sorted(selected_semanas))) if selected_semanas else "Sin selección")
+    st.markdown(f"**Año:** {selected_anio} | **Semana(s):** {semanas_label} | **Jurisdicción:** {provincia_filter}")
+
+    col1, col2, col3 = st.columns(3)
+    # Metrics logic: use provincial data for totals
+    if not df_prov.empty:
+        total_casos_loc = int(df_prov['Casos'].sum())
+        total_pop = int(df_prov['Poblacion'].sum())
+        avg_tasa = (total_casos_loc / total_pop * 100000) if total_pop > 0 else 0
+    else:
+        total_casos_loc, total_pop, avg_tasa = 0, 0, 0
+
+    with col1:
+        st.metric("Casos con Ref. Geográfica", f"{total_casos_loc:,}")
+    with col2:
+        st.metric("Población (Ambos Sexos)", f"{total_pop:,}")
+    with col3:
+        st.metric("Tasa x 100k hab.", f"{avg_tasa:.2f}")
+
+    if casos_sin_loc > 0:
+        st.warning(f"⚠️ **Atención:** Se detectaron **{int(casos_sin_loc):,}** casos sin referencia geográfica asignada para los filtros seleccionados.")
+
+    # --- MAPPING ---
+    st.subheader("Distribución Geográfica")
+
+    # Determine color scale
+    color_col = 'Casos' if metric_option == "Casos" else 'Tasa'
+    color_scale = "Reds" if metric_option == "Casos" else "Blues"
+
+    if provincia_filter == "Nacional":
+        m_col1, m_col2 = st.columns(2)
+        
+        with m_col1:
+            st.markdown("##### Nivel Provincial")
+            geojson_prov = load_geojson(PROV_GEOJSON)
+            if not df_prov.empty:
+                # Ensure Tasa and Poblacion exist even if pop lookup failed
+                if 'Tasa' not in df_prov.columns:
+                    df_prov['Tasa'] = 0.0
+                if 'Poblacion' not in df_prov.columns:
+                    df_prov['Poblacion'] = 0
+                fig_prov = px.choropleth_mapbox(
+                    data_frame=df_prov, geojson=geojson_prov, locations='id_provincia',
+                    featureidkey='properties.in1', color=color_col, hover_name='Provincia',
+                    hover_data=['Casos', 'Tasa', 'Poblacion'], color_continuous_scale=color_scale,
+                    mapbox_style="carto-positron", zoom=3, center={"lat": -38.4161, "lon": -63.6167},
+                    opacity=0.7, labels={'Casos': 'N° Casos', 'Tasa': 'Tasa'}
+                )
+                fig_prov.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+                st.plotly_chart(fig_prov, use_container_width=True)
+                
+                # Dynamic table columns based on metric
+                display_cols = ['Provincia', 'Casos']
+                df_disp = df_prov.copy()
+                if metric_option == "Tasas (cada 100k hab.)":
+                    display_cols += ['Poblacion', 'Tasa']
+                    df_disp['Poblacion'] = df_disp['Poblacion'].apply(lambda x: format_ar_number(x))
+                    df_disp['Tasa'] = df_disp['Tasa'].apply(lambda x: format_ar_number(x, 2))
+                
+                st.dataframe(df_disp[display_cols].sort_values('Casos', ascending=False), hide_index=True, use_container_width=True)
+            else:
+                st.info("Sin datos provinciales")
+
+        with m_col2:
+            st.markdown("##### Nivel Departamental (País)")
+            geojson_depto = load_geojson(DEPTO_GEOJSON)
+            if not df_depto.empty:
+                # Ensure Tasa and Poblacion exist even if pop lookup failed
+                if 'Tasa' not in df_depto.columns:
+                    df_depto['Tasa'] = 0.0
+                if 'Poblacion' not in df_depto.columns:
+                    df_depto['Poblacion'] = 0
+                fig_depto = px.choropleth_mapbox(
+                    data_frame=df_depto, geojson=geojson_depto, locations='id_departamento',
+                    featureidkey='properties.in1', color=color_col, hover_name='Departamento',
+                    hover_data=['Casos', 'Tasa', 'Poblacion'], color_continuous_scale=color_scale,
+                    mapbox_style="carto-positron", zoom=3, center={"lat": -38.4161, "lon": -63.6167},
+                    opacity=0.7, labels={'Casos': 'N° Casos', 'Tasa': 'Tasa'}
+                )
+                fig_depto.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500)
+                st.plotly_chart(fig_depto, use_container_width=True)
+                
+                # Dynamic table columns
+                display_cols = ['Departamento', 'Provincia', 'Casos']
+                df_disp_depto = df_depto.copy()
+                if metric_option == "Tasas (cada 100k hab.)":
+                    display_cols += ['Poblacion', 'Tasa']
+                    df_disp_depto['Poblacion'] = df_disp_depto['Poblacion'].apply(lambda x: format_ar_number(x))
+                    df_disp_depto['Tasa'] = df_disp_depto['Tasa'].apply(lambda x: format_ar_number(x, 2))
+                
+                st.dataframe(df_disp_depto[display_cols].sort_values('Casos', ascending=False), hide_index=True, use_container_width=True)
+            else:
+                st.info("Sin datos departamentales")
+    else:
+        # Provincial View (One Map)
+        geojson_depto = load_geojson(DEPTO_GEOJSON)
+        if not df_depto.empty:
+            if 'Tasa' not in df_depto.columns:
+                df_depto['Tasa'] = 0.0
+            if 'Poblacion' not in df_depto.columns:
+                df_depto['Poblacion'] = 0
+            fig = px.choropleth_mapbox(
+                data_frame=df_depto, geojson=geojson_depto, locations='id_departamento',
+                featureidkey='properties.in1', color=color_col, hover_name='Departamento',
+                hover_data=['Casos', 'Tasa', 'Poblacion'], color_continuous_scale=color_scale,
+                mapbox_style="carto-positron", zoom=5, center={"lat": -38.4161, "lon": -63.6167},
+                opacity=0.7, labels={'Casos': 'N° Casos', 'Tasa': 'Tasa'}
+            )
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=600)
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Dynamic table columns
+            display_cols = ['Departamento', 'Casos']
+            df_disp_single = df_depto.copy()
+            if metric_option == "Tasas (cada 100k hab.)":
+                display_cols += ['Poblacion', 'Tasa']
+                df_disp_single['Poblacion'] = df_disp_single['Poblacion'].apply(lambda x: format_ar_number(x))
+                df_disp_single['Tasa'] = df_disp_single['Tasa'].apply(lambda x: format_ar_number(x, 2))
+            
+            st.dataframe(df_disp_single[display_cols].sort_values('Casos', ascending=False), hide_index=True, use_container_width=True)
+        else:
+            st.warning("No hay datos para esta provincia.")
+
+    st.info("Nota: Los datos de población son proyecciones del INDEC (Ambos Sexos) para el año seleccionado.")
+else:
+    st.info("👋 Bienvenid@. Seleccione los filtros en la barra lateral y presione 'Generar Tablero' para visualizar los datos.")
