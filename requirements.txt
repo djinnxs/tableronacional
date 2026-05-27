@@ -11,3 +11,6 @@ xlsxwriter
 openpyxl
 google-generativeai
 matplotlib
+networkx
+scipy
+shapely
