@@ -144,7 +144,7 @@ def run_etl():
     df = df.replace(r'^\*sin dato\*$', pd.NA, regex=True)
     df = df.replace(r'^\*SIN DATO\*$', pd.NA, regex=True)
     
-    # ==================== PROCESAMIENTO DE FECHA (FECHA_APERTURA) ====================
+        # ==================== PROCESAMIENTO DE FECHA (FECHA_APERTURA) ====================
     print("📅 Procesando fecha desde FECHA_APERTURA...")
     
     if 'FECHA_APERTURA' in df.columns:
@@ -159,7 +159,7 @@ def run_etl():
         # Calcular semana epidemiológica
         df['semana_epi'] = df['fecha_apertura'].dt.isocalendar().week
         df['anio_epi'] = df['fecha_apertura'].dt.isocalendar().year
-        df['anio_semana'] = df['anio_epi'].astype(str) + df['semana_epi'].astype(str).str.zfill(2)
+        df['anio_semana'] = df['anio_epi'].astype(str) + ' - Semana ' + df['semana_epi'].astype(str).str.zfill(2)
         
         print(f"   Rango de fechas: {df['fecha_apertura'].min()} a {df['fecha_apertura'].max()}")
         
@@ -172,10 +172,20 @@ def run_etl():
             df['fecha_muestra'] = df['FECHA_MUESTRA'].apply(parse_fecha_apertura)
             df['retraso_apertura_muestra'] = (df['fecha_muestra'] - df['fecha_apertura']).dt.days
         
+        # CORREGIDO: FECHA_RECEPCION - bloque independiente, no dentro de FECHA_ESTUDIO
+        if 'FECHA_RECEPCION' in df.columns:
+            print("   Procesando FECHA_RECEPCION para retrasos...")
+            df['fecha_recepcion'] = df['FECHA_RECEPCION'].apply(parse_fecha_apertura)
+            df['retraso_apertura_recepcion'] = (df['fecha_recepcion'] - df['fecha_apertura']).dt.days
+            # Mostrar estadísticas básicas
+            print(f"      Retraso apertura→recepción - Mediana: {df['retraso_apertura_recepcion'].median():.0f} días")
+            print(f"      Registros con retraso: {df['retraso_apertura_recepcion'].notna().sum()}")
+        
         if 'FECHA_ESTUDIO' in df.columns:
             df['fecha_estudio'] = df['FECHA_ESTUDIO'].apply(parse_fecha_apertura)
             df['retraso_apertura_estudio'] = (df['fecha_estudio'] - df['fecha_apertura']).dt.days
             df['retraso_muestra_estudio'] = (df['fecha_estudio'] - df['fecha_muestra']).dt.days if 'fecha_muestra' in df.columns else pd.NA
+            
     else:
         print("⚠️ No se encontró columna FECHA_APERTURA")
         df['fecha_apertura'] = pd.NaT
@@ -369,30 +379,38 @@ def run_etl():
     else:
         df['fecha_fallecimiento'] = pd.NaT
     
-    # ==================== PROCESAMIENTO DE VACUNACIÓN ====================
+    # ==================== PROCESAMIENTO DE VACUNACIÓN (CORREGIDO) ====================
     print("💉 Procesando datos de vacunación...")
     
-    if 'VACUNA' in df.columns:
-        df['vacuna_tipo'] = df['VACUNA'].apply(clean_text)
-    elif 'VACUNA_NOMIVAC' in df.columns:
+    if 'VACUNA_NOMIVAC' in df.columns:
         df['vacuna_tipo'] = df['VACUNA_NOMIVAC'].apply(clean_text)
+    elif 'VACUNA' in df.columns:
+        df['vacuna_tipo'] = df['VACUNA'].apply(clean_text)
     else:
         df['vacuna_tipo'] = 'Sin dato'
     
-    if 'DOSIS' in df.columns:
+    if 'DOSIS_NOMIVAC' in df.columns:
+        df['vacuna_dosis'] = pd.to_numeric(df['DOSIS_NOMIVAC'], errors='coerce').fillna(0).astype(int)
+    elif 'DOSIS' in df.columns:
         df['vacuna_dosis'] = pd.to_numeric(df['DOSIS'], errors='coerce').fillna(0).astype(int)
     else:
         df['vacuna_dosis'] = 0
     
+    # Fecha de aplicación
+    if 'FECHA_APLICACION_NOMIVAC' in df.columns:
+        df['fecha_aplicacion'] = df['FECHA_APLICACION_NOMIVAC'].apply(parse_fecha_apertura)
+    elif 'FECHA_APLICACION' in df.columns:
+        df['fecha_aplicacion'] = df['FECHA_APLICACION'].apply(parse_fecha_apertura)
+    else:
+        df['fecha_aplicacion'] = pd.NaT
+    
+    # Esquema completo (2 o más dosis)
     df['vacuna_esquema_completo'] = df['vacuna_dosis'] >= 2
     
     # Tiempo desde última dosis (meses)
-    if 'FECHA_APLICACION' in df.columns:
-        df['fecha_aplicacion'] = df['FECHA_APLICACION'].apply(parse_fecha_apertura)
-        if 'fecha_apertura' in df.columns:
-            df['meses_desde_ultima_dosis'] = (df['fecha_apertura'] - df['fecha_aplicacion']).dt.days / 30
+    if 'fecha_aplicacion' in df.columns and 'fecha_apertura' in df.columns:
+        df['meses_desde_ultima_dosis'] = (df['fecha_apertura'] - df['fecha_aplicacion']).dt.days / 30
     else:
-        df['fecha_aplicacion'] = pd.NaT
         df['meses_desde_ultima_dosis'] = pd.NA
     
     # ==================== VIAJES Y ANTECEDENTES ====================
@@ -433,8 +451,8 @@ def run_etl():
         # Fechas y tiempo
         'fecha_apertura', 'anio', 'mes', 'dia', 'trimestre',
         'semana_epi', 'anio_epi', 'anio_semana',
-        'fecha_consulta', 'fecha_muestra', 'fecha_estudio', 'fecha_fallecimiento',
-        'retraso_apertura_consulta', 'retraso_apertura_muestra', 
+        'fecha_consulta', 'fecha_muestra', 'fecha_recepcion', 'fecha_estudio', 'fecha_fallecimiento',
+        'retraso_apertura_consulta', 'retraso_apertura_muestra', 'retraso_apertura_recepcion',
         'retraso_apertura_estudio', 'retraso_muestra_estudio',
         
         # Geografía
@@ -475,10 +493,10 @@ def run_etl():
                 df[col] = False
             elif col in ['anio', 'mes', 'dia', 'trimestre', 'semana_epi', 'anio_epi', 'edad', 'vacuna_dosis']:
                 df[col] = 0
-            elif col in ['fecha_apertura', 'fecha_consulta', 'fecha_muestra', 'fecha_estudio', 
+            elif col in ['fecha_apertura', 'fecha_consulta', 'fecha_muestra', 'fecha_recepcion', 'fecha_estudio', 
                         'fecha_fallecimiento', 'fecha_aplicacion']:
                 df[col] = pd.NaT
-            elif col in ['retraso_apertura_consulta', 'retraso_apertura_muestra', 
+            elif col in ['retraso_apertura_consulta', 'retraso_apertura_muestra', 'retraso_apertura_recepcion',
                         'retraso_apertura_estudio', 'retraso_muestra_estudio', 'meses_desde_ultima_dosis']:
                 df[col] = pd.NA
             else:
