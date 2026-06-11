@@ -17,3 +17,5 @@ shapely
 seaborn
 streamlit-autorefresh
 chardet
+statsmodels
+openpyxl
