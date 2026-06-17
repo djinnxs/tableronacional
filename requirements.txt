@@ -19,3 +19,4 @@ streamlit-autorefresh
 chardet
 statsmodels
 openpyxl
+seaborn
