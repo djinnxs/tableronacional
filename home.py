@@ -72,6 +72,8 @@ if not selected_anios and anios_list:
     selected_anios = [anios_list[0]]
 selected_semanas = st.sidebar.multiselect("Semanas", semanas_list, default=["Todas"])
 selected_event_ids = st.sidebar.multiselect("Eventos", list(eventos_dict.keys()), format_func=lambda x: f"{x} - {eventos_dict[x]}")
+if "pending_jurisdiccion" in st.session_state:
+    st.session_state.jurisdiccion = st.session_state.pop("pending_jurisdiccion")
 if "jurisdiccion" not in st.session_state:
     st.session_state.jurisdiccion = "Nacional"
 selected_provincia_ui = st.sidebar.selectbox("Jurisdicción", ["Nacional"] + provincias_list, key="jurisdiccion")
@@ -133,12 +135,21 @@ df_dash, df_full = get_dashboard_data(selected_anios, selected_semanas, selected
 sem_hoy, anio_hoy = get_epi_week_data(datetime.date.today())
 
 # --- UI ---
-st.markdown(f"""
-    <div style='display: flex; align-items: baseline; gap: 20px;'>
-        <h1 class='premium-header'>Situación: {selected_provincia_ui}</h1>
-        <h3 style='color: #666;'>Semana Epi actual: <span style='color: #e11d48;'>{sem_hoy}</span> del {anio_hoy}</h3>
-    </div>
-    """, unsafe_allow_html=True)
+col_head, col_back = st.columns([0.75, 0.25])
+with col_head:
+    st.markdown(f"""
+        <div style='display: flex; align-items: baseline; gap: 20px;'>
+            <h1 class='premium-header'>Situación: {selected_provincia_ui}</h1>
+            <h3 style='color: #666;'>Semana Epi actual: <span style='color: #e11d48;'>{sem_hoy}</span> del {anio_hoy}</h3>
+        </div>
+        """, unsafe_allow_html=True)
+
+with col_back:
+    if selected_provincia_ui != "Nacional":
+        st.write("") # Espaciado vertical para alinear con el título
+        if st.button("🇦🇷 Volver a Vista Nacional", use_container_width=True):
+            st.session_state.pending_jurisdiccion = "Nacional"
+            st.rerun()
 
 if not df_dash.empty:
     c1, c2, c3 = st.columns(3)
@@ -199,7 +210,7 @@ if not df_dash.empty:
                 if not matched.empty:
                     clicked_name = matched.iloc[0]['Nombre']
                     if clicked_name in provincias_list:
-                        st.session_state.jurisdiccion = clicked_name
+                        st.session_state.pending_jurisdiccion = clicked_name
                         st.rerun()
 
     if mostrar_grafico and col_pie is not None:
