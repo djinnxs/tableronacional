@@ -322,14 +322,14 @@ if ejecutar or st.session_state.get('rss_corriendo', False):
                 
                 st.markdown("#### 🗺️ Distribución de Alertas por Jurisdicción (Haz clic en una provincia para filtrar la tabla)")
                 
-                fig = px.choropleth_mapbox(
+                fig = px.choropleth_map(
                     df_mapa_completo,
                     geojson=geojson,
                     locations='id_geo',
                     featureidkey="properties.in1",
                     color='Noticias',
                     hover_name='provincia',
-                    mapbox_style="white-bg",
+                    map_style="white-bg",
                     color_continuous_scale="Reds",
                     opacity=0.7,
                     labels={'Noticias': 'Alertas Detectadas'}
@@ -344,7 +344,7 @@ if ejecutar or st.session_state.get('rss_corriendo', False):
                     zoom_level = coords["zoom"]
                 
                 fig.update_layout(
-                    mapbox_layers=[
+                    map_layers=[
                         {
                             "below": 'traces',
                             "sourcetype": "raster",
@@ -356,7 +356,7 @@ if ejecutar or st.session_state.get('rss_corriendo', False):
                     ],
                     margin={"r":0,"t":0,"l":0,"b":0},
                     height=450,
-                    mapbox={"center": center_coords, "zoom": zoom_level}
+                    map={"center": center_coords, "zoom": zoom_level}
                 )
                 
                 # Renderizador del gráfico interactivo con detección de eventos on_select

@@ -1019,14 +1019,14 @@ with tab5:
         casos_prov = casos_prov.dropna(subset=['id'])
         
         if not casos_prov.empty:
-            fig_map = px.choropleth_mapbox(
+            fig_map = px.choropleth_map(
                 casos_prov, 
                 geojson=geojson, 
                 locations='id', 
                 featureidkey="properties.in1",
                 color='Casos', 
                 title='Distribución de Casos Secuenciados por Provincia',
-                mapbox_style='carto-positron', 
+                map_style='carto-positron', 
                 center={"lat": -38.4161, "lon": -63.6167},
                 zoom= 3.0, 
                 color_continuous_scale='Viridis',
@@ -1049,14 +1049,14 @@ with tab5:
         
         if not casos_depto.empty:
             # Usar la misma lógica que home.py: featureidkey="properties.in1"
-            fig_depto_map = px.choropleth_mapbox(
+            fig_depto_map = px.choropleth_map(
                 casos_depto,
                 geojson=geojson_depto,
                 locations='id',
                 featureidkey="properties.in1",
                 color='Casos',
                 title='Distribución de Casos por Departamento',
-                mapbox_style='carto-positron',
+                map_style='carto-positron',
                 center={"lat": -38.4161, "lon": -63.6167},
                 zoom=3,
                 color_continuous_scale='Viridis',

@@ -146,14 +146,14 @@ if not df_dash.empty:
 
     # Mapa coroplético
     geojson = load_geojson('data/provincia.json')
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         df_dash, geojson=geojson, locations='id_geo', featureidkey="properties.in1",
-        color='Tasa', hover_name='Nombre', mapbox_style="white-bg",
+        color='Tasa', hover_name='Nombre', map_style="white-bg",
         opacity=0.7, color_continuous_scale="Reds"
     )
 
     fig.update_layout(
-        mapbox_layers=[{
+        map_layers=[{
             "below": 'traces',
             "sourcetype": "raster",
             "sourceattribution": "IGN Argenmap",
@@ -164,7 +164,7 @@ if not df_dash.empty:
     fig.update_layout(
         margin={"r":0,"t":0,"l":0,"b":0},
         height=500,
-        mapbox={"center": {"lat": -40.0, "lon": -63.0}, "zoom": 2.7}
+        map={"center": {"lat": -40.0, "lon": -63.0}, "zoom": 2.7}
     )
     st.plotly_chart(fig, use_container_width=True)
 

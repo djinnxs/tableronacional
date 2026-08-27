@@ -2,7 +2,7 @@ streamlit
 pandas
 pyarrow
 geopandas
-plotly
+plotly>=6.0
 duckdb
 requests
 beautifulsoup4
@@ -18,5 +18,3 @@ seaborn
 streamlit-autorefresh
 chardet
 statsmodels
-openpyxl
-seaborn

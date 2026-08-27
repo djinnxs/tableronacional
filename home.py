@@ -173,14 +173,14 @@ if not df_dash.empty:
         geojson = load_geojson('data/provincia.json' if selected_provincia_ui == "Nacional" else 'data/departamento.json')
         color_v = 'Casos' if metric_option == "Casos" else 'Tasa'
         
-        fig = px.choropleth_mapbox(
+        fig = px.choropleth_map(
     df_dash, geojson=geojson, locations='id_geo', featureidkey="properties.in1",
-    color=color_v, hover_name='Nombre', mapbox_style="white-bg",
+    color=color_v, hover_name='Nombre', map_style="white-bg",
     opacity=0.7, color_continuous_scale="Blues" if metric_option == "Casos" else "Reds"
 )
         
         fig.update_layout(
-            mapbox_layers=[
+            map_layers=[
                 {
                     "below": 'traces',
                     "sourcetype": "raster",
@@ -198,7 +198,7 @@ if not df_dash.empty:
             c = PROVINCIA_COORDENADAS.get(selected_provincia_ui, {"lat": -38.0, "lon": -63.0, "zoom": 5.0})
             center, zoom = {"lat": c["lat"], "lon": c["lon"]}, c["zoom"]
             
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500, mapbox={"center": center, "zoom": zoom})
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, height=500, map={"center": center, "zoom": zoom})
         sel = st.plotly_chart(fig, width='stretch', on_select="rerun", selection_mode="points", key=f"main_map_{selected_provincia_ui}")
         
         # Lógica de drill-down: si estamos en Nacional y hacemos clic en una provincia, navegamos a ella
