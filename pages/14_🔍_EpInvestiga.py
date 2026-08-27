@@ -153,7 +153,7 @@ if buscar and query and query.strip():
             
             tl_sorted = timeline.dropna(subset=['lat','lon']).sort_values('Fecha')
             if len(tl_sorted) > 1:
-                fig.add_trace(go.Scattermapbox(
+                fig.add_trace(go.Scattermap(
                     lat=tl_sorted['lat'], lon=tl_sorted['lon'],
                     mode='lines', name='Trayectoria',
                     line=dict(width=2, color='#ff6b6b'),
@@ -165,7 +165,7 @@ if buscar and query and query.strip():
                 fecha_str = r['Fecha'].strftime('%Y-%m-%d') if pd.notna(r['Fecha']) else 'Sin fecha'
                 hover_text.append(f"📍 {r.get('Lugar','')}<br>📅 {fecha_str}<br>🌿 {r.get('Especie','')}<br>📡 {r.get('Plataforma','')}")
             
-            fig.add_trace(go.Scattermapbox(
+            fig.add_trace(go.Scattermap(
                 lat=tl_sorted['lat'], lon=tl_sorted['lon'],
                 mode='markers', name='Observaciones',
                 marker=dict(size=10, color='#00e5ff', opacity=0.9),
@@ -175,13 +175,13 @@ if buscar and query and query.strip():
             if len(tl_sorted) >= 2:
                 first = tl_sorted.iloc[0]
                 last = tl_sorted.iloc[-1]
-                fig.add_trace(go.Scattermapbox(
+                fig.add_trace(go.Scattermap(
                     lat=[first['lat']], lon=[first['lon']],
                     mode='markers', name='PRIMER registro',
                     marker=dict(size=16, color='#4ade80', symbol='circle'),
                     text=[f"🟢 PRIMER registro<br>{first.get('Lugar','')}"], hoverinfo='text'
                 ))
-                fig.add_trace(go.Scattermapbox(
+                fig.add_trace(go.Scattermap(
                     lat=[last['lat']], lon=[last['lon']],
                     mode='markers', name='ÚLTIMO registro',
                     marker=dict(size=16, color='#ef4444', symbol='circle'),
@@ -189,8 +189,8 @@ if buscar and query and query.strip():
                 ))
             
             fig.update_layout(
-                mapbox_style="carto-darkmatter",
-                mapbox=dict(
+                map_style="carto-darkmatter",
+                map=dict(
                     zoom=2,
                     center=dict(lat=tl_sorted['lat'].mean(), lon=tl_sorted['lon'].mean())
                 ),
