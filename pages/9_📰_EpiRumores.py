@@ -322,19 +322,6 @@ if ejecutar or st.session_state.get('rss_corriendo', False):
                 
                 st.markdown("#### 🗺️ Distribución de Alertas por Jurisdicción (Haz clic en una provincia para filtrar la tabla)")
                 
-                fig = px.choropleth_map(
-                    df_mapa_completo,
-                    geojson=geojson,
-                    locations='id_geo',
-                    featureidkey="properties.in1",
-                    color='Noticias',
-                    hover_name='provincia',
-                    map_style="white-bg",
-                    color_continuous_scale="Reds",
-                    opacity=0.7,
-                    labels={'Noticias': 'Alertas Detectadas'}
-                )
-                
                 if provincia_filtro == "Toda Argentina":
                     center_coords = {"lat": -38.4161, "lon": -63.6167}
                     zoom_level = 2.7
@@ -342,22 +329,56 @@ if ejecutar or st.session_state.get('rss_corriendo', False):
                     coords = PROVINCIA_COORDENADAS.get(provincia_filtro, {"lat": -38.4161, "lon": -63.6167, "zoom": 3.4})
                     center_coords = {"lat": coords["lat"], "lon": coords["lon"]}
                     zoom_level = coords["zoom"]
-                
-                fig.update_layout(
-                    map_layers=[
-                        {
-                            "below": 'traces',
-                            "sourcetype": "raster",
-                            "sourceattribution": "IGN Argenmap",
-                            "source": [
-                                "https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png"
-                            ]
-                        }
-                    ],
-                    margin={"r":0,"t":0,"l":0,"b":0},
-                    height=450,
-                    map={"center": center_coords, "zoom": zoom_level}
-                )
+
+                layers_ign = [
+                    {
+                        "below": 'traces',
+                        "sourcetype": "raster",
+                        "sourceattribution": "IGN Argenmap",
+                        "source": [
+                            "https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png"
+                        ]
+                    }
+                ]
+
+                if hasattr(px, "choropleth_map"):
+                    fig = px.choropleth_map(
+                        df_mapa_completo,
+                        geojson=geojson,
+                        locations='id_geo',
+                        featureidkey="properties.in1",
+                        color='Noticias',
+                        hover_name='provincia',
+                        map_style="white-bg",
+                        color_continuous_scale="Reds",
+                        opacity=0.7,
+                        labels={'Noticias': 'Alertas Detectadas'}
+                    )
+                    fig.update_layout(
+                        map_layers=layers_ign,
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        height=450,
+                        map={"center": center_coords, "zoom": zoom_level}
+                    )
+                else:
+                    fig = px.choropleth_mapbox(
+                        df_mapa_completo,
+                        geojson=geojson,
+                        locations='id_geo',
+                        featureidkey="properties.in1",
+                        color='Noticias',
+                        hover_name='provincia',
+                        mapbox_style="white-bg",
+                        color_continuous_scale="Reds",
+                        opacity=0.7,
+                        labels={'Noticias': 'Alertas Detectadas'}
+                    )
+                    fig.update_layout(
+                        mapbox_layers=layers_ign,
+                        margin={"r":0,"t":0,"l":0,"b":0},
+                        height=450,
+                        mapbox={"center": center_coords, "zoom": zoom_level}
+                    )
                 
                 # Renderizador del gráfico interactivo con detección de eventos on_select
                 seleccion_mapa = st.plotly_chart(

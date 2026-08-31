@@ -146,26 +146,37 @@ if not df_dash.empty:
 
     # Mapa coroplético
     geojson = load_geojson('data/provincia.json')
-    fig = px.choropleth_map(
-        df_dash, geojson=geojson, locations='id_geo', featureidkey="properties.in1",
-        color='Tasa', hover_name='Nombre', map_style="white-bg",
-        opacity=0.7, color_continuous_scale="Reds"
-    )
+    layers_config = [{
+        "below": 'traces',
+        "sourcetype": "raster",
+        "sourceattribution": "IGN Argenmap",
+        "source": ["https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png"]
+    }]
 
-    fig.update_layout(
-        map_layers=[{
-            "below": 'traces',
-            "sourcetype": "raster",
-            "sourceattribution": "IGN Argenmap",
-            "source": ["https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/capabaseargenmap@EPSG%3A3857@png/{z}/{x}/{-y}.png"]
-        }]
-    )
-
-    fig.update_layout(
-        margin={"r":0,"t":0,"l":0,"b":0},
-        height=500,
-        map={"center": {"lat": -40.0, "lon": -63.0}, "zoom": 2.7}
-    )
+    if hasattr(px, "choropleth_map"):
+        fig = px.choropleth_map(
+            df_dash, geojson=geojson, locations='id_geo', featureidkey="properties.in1",
+            color='Tasa', hover_name='Nombre', map_style="white-bg",
+            opacity=0.7, color_continuous_scale="Reds"
+        )
+        fig.update_layout(
+            map_layers=layers_config,
+            margin={"r":0,"t":0,"l":0,"b":0},
+            height=500,
+            map={"center": {"lat": -40.0, "lon": -63.0}, "zoom": 2.7}
+        )
+    else:
+        fig = px.choropleth_mapbox(
+            df_dash, geojson=geojson, locations='id_geo', featureidkey="properties.in1",
+            color='Tasa', hover_name='Nombre', mapbox_style="white-bg",
+            opacity=0.7, color_continuous_scale="Reds"
+        )
+        fig.update_layout(
+            mapbox_layers=layers_config,
+            margin={"r":0,"t":0,"l":0,"b":0},
+            height=500,
+            mapbox={"center": {"lat": -40.0, "lon": -63.0}, "zoom": 2.7}
+        )
     st.plotly_chart(fig, use_container_width=True)
 
     # Tabla

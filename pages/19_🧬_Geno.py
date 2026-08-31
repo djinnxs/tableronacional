@@ -1019,19 +1019,34 @@ with tab5:
         casos_prov = casos_prov.dropna(subset=['id'])
         
         if not casos_prov.empty:
-            fig_map = px.choropleth_map(
-                casos_prov, 
-                geojson=geojson, 
-                locations='id', 
-                featureidkey="properties.in1",
-                color='Casos', 
-                title='Distribución de Casos Secuenciados por Provincia',
-                map_style='carto-positron', 
-                center={"lat": -38.4161, "lon": -63.6167},
-                zoom= 3.0, 
-                color_continuous_scale='Viridis',
-                hover_data={'Casos': ':.0f'}
-            )
+            if hasattr(px, "choropleth_map"):
+                fig_map = px.choropleth_map(
+                    casos_prov, 
+                    geojson=geojson, 
+                    locations='id', 
+                    featureidkey="properties.in1",
+                    color='Casos', 
+                    title='Distribución de Casos Secuenciados por Provincia',
+                    map_style='carto-positron', 
+                    center={"lat": -38.4161, "lon": -63.6167},
+                    zoom=3.0, 
+                    color_continuous_scale='Viridis',
+                    hover_data={'Casos': ':.0f'}
+                )
+            else:
+                fig_map = px.choropleth_mapbox(
+                    casos_prov, 
+                    geojson=geojson, 
+                    locations='id', 
+                    featureidkey="properties.in1",
+                    color='Casos', 
+                    title='Distribución de Casos Secuenciados por Provincia',
+                    mapbox_style='carto-positron', 
+                    center={"lat": -38.4161, "lon": -63.6167},
+                    zoom=3.0, 
+                    color_continuous_scale='Viridis',
+                    hover_data={'Casos': ':.0f'}
+                )
             fig_map.update_layout(height=600, margin={"r":0,"t":40,"l":0,"b":0})
             st.plotly_chart(fig_map, use_container_width=True)
     
@@ -1049,19 +1064,34 @@ with tab5:
         
         if not casos_depto.empty:
             # Usar la misma lógica que home.py: featureidkey="properties.in1"
-            fig_depto_map = px.choropleth_map(
-                casos_depto,
-                geojson=geojson_depto,
-                locations='id',
-                featureidkey="properties.in1",
-                color='Casos',
-                title='Distribución de Casos por Departamento',
-                map_style='carto-positron',
-                center={"lat": -38.4161, "lon": -63.6167},
-                zoom=3,
-                color_continuous_scale='Viridis',
-                hover_data={'Casos': ':.0f', 'Departamento': True}
-            )
+            if hasattr(px, "choropleth_map"):
+                fig_depto_map = px.choropleth_map(
+                    casos_depto,
+                    geojson=geojson_depto,
+                    locations='id',
+                    featureidkey="properties.in1",
+                    color='Casos',
+                    title='Distribución de Casos por Departamento',
+                    map_style='carto-positron',
+                    center={"lat": -38.4161, "lon": -63.6167},
+                    zoom=3,
+                    color_continuous_scale='Viridis',
+                    hover_data={'Casos': ':.0f', 'Departamento': True}
+                )
+            else:
+                fig_depto_map = px.choropleth_mapbox(
+                    casos_depto,
+                    geojson=geojson_depto,
+                    locations='id',
+                    featureidkey="properties.in1",
+                    color='Casos',
+                    title='Distribución de Casos por Departamento',
+                    mapbox_style='carto-positron',
+                    center={"lat": -38.4161, "lon": -63.6167},
+                    zoom=3,
+                    color_continuous_scale='Viridis',
+                    hover_data={'Casos': ':.0f', 'Departamento': True}
+                )
             fig_depto_map.update_layout(height=600, margin={"r":0,"t":40,"l":0,"b":0})
             st.plotly_chart(fig_depto_map, use_container_width=True)
         else:
